@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import truthtable
+
 # Operator names
 _operator_names = ('not', 'and', 'or', 'xor', 'nand', 'nor', 'xnor')
 
@@ -9,18 +11,6 @@ _inverted_operator_names = {
     'or': 'nor',
     'xor': 'xnor'
 }
-
-_infty = float('inf')
-_operator_arg_limits = {
-    'not': 1,
-    'and': _infty,
-    'or': _infty,
-    'xor': 2,
-    'nand': _infty,
-    'nor': _infty,
-    'xnor': 2
-}
-
 
 # Operator types
 def NOT(obj):
@@ -64,6 +54,23 @@ def _both_as_keys(*lsts):
 
     return dicts
 
+_infty = float('inf')
+_operator_arg_limits = {
+    'not': 1,
+    NOT: 1,
+    'and': _infty,
+    AND: _infty,
+    'or': _infty,
+    OR: _infty,
+    'xor': 2,
+    XOR: 2,
+    'nand': _infty,
+    NAND: _infty,
+    'nor': _infty,
+    NOR: _infty,
+    'xnor': 2,
+    XNOR: 2
+}
 
 _operator_types = (NOT, AND, OR, XOR, NAND,
                    NOR, XNOR)
@@ -95,7 +102,11 @@ class BooleanExpressionError(Exception):
 def is_operator(obj):
     return 'func' in obj.__dict__ and 'objs' in obj.__dict__
 
-def is_object(obj):
+def is_multi_operator(obj):
+    return is_operator(obj) and \
+        _operator_arg_limits[obj.get_name()] == _infty
+
+def is_variable(obj):
     return 'name' in obj.__dict__
 
 def _recursive_show_loop(op):
@@ -125,17 +136,33 @@ def _recursive_express_loop(op):
     text += ')'
     return text
 
-class BooleanObject(object):
+def _recursive_test_loop(op, **keyvals):
+    objs = []
+    for x in op.objs:
+        if is_operator(x):
+            objs.append(_recursive_test_loop(x, **keyvals))
+        else:
+            objs.append(keyvals[x.get_name()])
+    return op.func(*objs)
+
+class BooleanBaseObject(object):
+    def is_operator(self):
+        return False
+
+class BooleanVariable(BooleanBaseObject):
     def __init__(self, name):
         self.name = name
 
     def get_name(self):
         return self.name
 
+    def simplify(self):
+        return self
+
     def __str__(self):
         return self.name
 
-class BooleanOperator(object):
+class BooleanOperator(BooleanBaseObject):
     def __init__(self, kind, *objs):
         self.set_kind(kind)
         self.objs = objs
@@ -150,8 +177,20 @@ class BooleanOperator(object):
         else:
             self.func = kind
 
+    def get_variables(self):
+        return _get_all_variables(self)
+
     def get_name(self):
         return _translated_operator_names[self.func]
+
+    def create_truth_table(self):
+        return truthtable.create_from_expression(self)
+
+    def test(self, **keyvals):
+        return _recursive_test_loop(self, **keyvals)
+
+    def simplify(self):
+        return simplify_expression(self)
 
     def express(self):
         """Return a string formatted in a human-friendly way"""
@@ -160,6 +199,30 @@ class BooleanOperator(object):
     def __str__(self):
         return _recursive_show_loop(self)
 
+def _get_all_variables(op):
+    vs = []
+    for x in op.objs:
+        if is_variable(x):
+            vs.append(x.get_name())
+        else:
+            vs.extend(_get_all_variables(x))
+    return list(set(vs))
+    
+def simplify_expression(expr):
+    objs = []
+    if is_operator(expr):
+        for x in expr.objs:
+            if is_operator(x):
+                if len(x.objs) == 1 and \
+                        _operator_arg_limits[x.get_name()] == _infty:
+                    objs.append(x.objs[0])
+                else:
+                    objs.append(simplify_expression(x))
+            else:
+                objs.append(x)
+    expr.objs = objs
+    return expr
+    
 def _parse_raw_part(expr, obj_history={}):
     levels = 0
     objs = []
@@ -213,7 +276,7 @@ def _parse_raw_part(expr, obj_history={}):
                         # require separate actions.
                         continue
                 else:
-                    obj = BooleanObject(x)
+                    obj = BooleanVariable(x)
                     obj_history[x] = obj
                 if invert_next:
                     obj = BooleanOperator(NOT, obj)
@@ -243,224 +306,6 @@ def parse_raw_expression(expr):
     complete = _parse_raw_part(expr)
     return complete
 
-def _simplify_xor(op):
-    op.set_kind(OR)
-    objs = []
-    for i in range(2):
-        objs.append(BooleanOperator(
-                AND, op.objs[i], BooleanOperator(
-                    NOT, op.objs[(i + 1) % 2])))
-    op.objs = objs
-    return op
-
-def _simplify_and(op):
-    op.objs = [_simplify_invert(x) for x in op.objs]
-    op = _simplify_invert(op, OR)
-    return op
-
-def _simplify_invert(obj, new_kind=None):
-    if new_kind is not None:
-        obj.set_kind(new_kind)
-    return BooleanOperator(NOT, obj)
-
-def _simplify_part(op):
-    objs = []
-    for x in op.objs:
-        if is_operator(x):
-            objs.append(_simplify_part(x))
-        else:
-            objs.append(x)
-    op.objs = objs
-
-    if op.func == AND:
-        op = _simplify_and(op)
-    elif op.func == XOR:
-        op = _simplify_xor(op)
-    elif op.func == NAND:
-        op.func = OR
-        op.objs = [_simplify_invert(x) for x in op.objs]
-    elif op.func == NOR:
-        op = _simplify_invert(op, OR)
-    elif op.func == XNOR:
-        op = _simplify_invert(_simplify_xor(op))
-
-    return op
-
-def _unnot_part(op):
-    objs = []
-    for x in op.objs:
-        if is_operator(x):
-            objs.append(_unnot_part(x))
-        else:
-            objs.append(x)
-    op.objs = objs
-
-    if op.func == NOT:
-        sub = op.objs[0]
-        if is_operator(sub) and sub.func == NOT:
-            op = sub.objs[0]
-
-    return op
-
-def simplify_expression(expr):
-    """
-    Convert all XORS, NANDS, NORS and XNORS into their simpler (and
-    longer) equivalents, and convert all ANDS to combinations of NOTS
-    and ORS.
-    """
-    if not is_operator(expr):
-        return expr
-
-    return _unnot_part(_simplify_part(expr))
-
-def _ungroup_part(op):
-    if not is_operator(op):
-        return op
-
-    objs = []
-    if op.func == OR:
-        for x in op.objs:
-            if is_operator(x):
-                ungrouped = _ungroup_part(x)
-                if x.func == OR:
-                    objs.extend(ungrouped.objs)
-                else:
-                    objs.append(ungrouped)
-            else:
-                objs.append(x)
-    else:
-        for x in op.objs:
-            objs.append(_ungroup_part(x))
-    op.objs = objs
-    return op
-
-def ungroup_expression(expr):
-    """
-    Open groups of expressions wherever possible.
-    """
-    if not is_operator(expr):
-        return expr
-
-    return _ungroup_part(expr)
-
-def _match_two(a, b):
-    if a == b or (is_object(a) and is_object(b) and a.name == b.name):
-        return True
-    elif is_operator(a) and is_operator(b) and a.func == b.func and \
-            len(a.objs) == len(b.objs):
-        used = []
-        for i in range(len(a.objs)):
-            ok = False
-            for j in range(len(a.objs)):
-                if j not in used and _match_two(a.objs[i], b.objs[j]):
-                    used.append(j)
-                    ok = True
-                    break
-            if not ok:
-                return False
-        return True
-    else:
-        return False
-
-def _shorten_part(op):
-    objs = []
-    for x in op.objs:
-        if is_operator(x):
-            objs.append(_shorten_part(x))
-        else:
-            objs.append(x)
-
-            # Eh... Didn't go too well. Tried to apply this:
-            # (A AND B AND C) OR (A AND D AND E) =
-            # !(!A OR !(!B OR !C) OR !(!D OR !E))
-    # def or_in_not(o):
-    #     return is_operator(o) and o.func == NOT and \
-    #         is_operator(o.objs[0]) \
-    #         and o.objs[0].func == OR
-
-#     if is_operator(op) and op.func == OR:
-#         for x in objs:
-#             if or_in_not(x):
-# #                print x.objs[0]
-#                 for xx in x.objs[0].objs:
-#                     matches = 0
-#                     for y in objs:
-#                         if y != x and or_in_not(y):
-# #                            print ' ', y.objs[0]
-#                             for yy in y.objs[0].objs:
-#                                 if _match_two(xx, yy):
-#                                     print 2, xx, '|||', yy
-#                                     matches += 1
-#                                     #y.objs[0].objs.remove(yy)
-#                     if matches > 0:
-#                         x.objs[0].objs.remove(xx)
-#                         objs.append(xx)
-
-
-        # for a in objs:
-        # if is_operator(a) and a.func == OR:
-        #     for x in a.objs:
-        #         if is_operator(x) and x.func == OR:
-        #             print x
-        #             for y in x.objs[0].objs:
-        #                 for z in objs:
-        #                     if or_in_not(z):
-        #                         for u in z.objs[0].objs:
-        #                             print y, u
-        #                             if _match_two(y, u):
-        #                                 print y, u
-                        
-
-    for x in reversed(objs):
-        new_objs = [x]
-        for y in objs:
-            if not _match_two(x, y):
-                new_objs.append(y)
-        objs = new_objs
-
-    op.objs = objs
-    return _unnot_part(_unor_part(op))
-
-def _unor_part(op):
-    objs = []
-    for x in op.objs:
-        if is_operator(x):
-            objs.append(_unor_part(x))
-        else:
-            objs.append(x)
-    op.objs = objs
-
-    if op.func == OR and len(op.objs) == 1:
-        op = op.objs[0]
-    return op
-
-def shorten_expression(expr):
-    """
-    Shorten expression, i.e. remove parts that have the same function.
-    """
-    if not is_operator(expr):
-        return expr
-
-    return _shorten_part(expr)
-
-def process_expression(expr, show=True):
-    if show:
-        def put(text):
-            print text
-    else:
-        put = lambda text: None
-
-    put('Original expression:\n%s\n' % expr)
-    expr = parse_raw_expression(expr)
-    put('Parsed expression:\n%s\n' % expr.express())
-    expr = simplify_expression(expr)
-    put('Simplified expression:\n%s\n' % expr.express())
-    expr = ungroup_expression(expr)
-    put('Expression with fewer subgroups:\n%s\n' % expr.express())
-    expr = shorten_expression(expr)
-    put('Expression with fewer redundancies:\n%s' % expr.express())
-    return expr
-
 # On direct execution:
 if __name__ == '__main__':
     # Show a test
@@ -469,4 +314,7 @@ if __name__ == '__main__':
     if not expr:
         expr = '(A and B) or (A and (C or !D))'
 
-    process_expression(expr)
+    expr = parse_raw_expression(expr)
+    print expr.express()
+    print truthtable.shorten_truthtable(expr.create_truth_table()).simplify().express()
+    

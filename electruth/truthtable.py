@@ -1,7 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import booleanexpression
+import math
+
+import booleanexpression as boolexpr
+
+def decimal_to_binary(dec, min_size=None):
+    if dec == 0:
+        string = '0'
+    else:
+        string = ''.join([str((dec >> bin) & 1) for
+                          bin in range(int(math.floor(
+                            math.log(dec, 2))), -1, -1)])
+    if min_size is not None:
+        string = '0' * (min_size - len(string)) + string
+    return string
+
+class Truthtable(object):
+    names=[]
+    rows=[]
+
+    def __init__(self, names, rows):
+        self.names = names
+        self.rows = rows
 
 def parse_truthtable(path):
     outputs = []
@@ -38,18 +59,117 @@ def parse_truthtable(path):
 
     final = {}
     for i in range(len(outputs)):
-        t = ''
+        t = []
         for x in outputs[i]:
-            t += '('
+            tt = []
+            t.append(tt)
             for y in x:
-                if not y[1]:
-                    t += '!'
-                t += input_names[y[0]] + '&'
-            t = t[:-1]
-            t += ')|'
-        t = t[:-1]
-        final[output_names[i]] = t
+                tt.append(None)
+            for y in x:
+                tt[y[0]] = bool(y[1])
+        final[output_names[i]] = Truthtable(input_names, t)
     return final
+
+def shorten_truthtable(table):
+    reqs = table.rows
+    while True:
+        nreqs = _shorten(reqs)
+        ok = False
+        if len(nreqs) == len(reqs):
+            ok = True
+            for i in range(len(reqs)):
+                for j in range(len(reqs[i])):
+                    if nreqs[i][j] != reqs[i][j]:
+                        ok = False
+                        break
+                if not ok:
+                    break
+        reqs = nreqs
+        if ok:
+            # It cannot be shortened any further
+            break
+
+    inputs = []
+    for x in table.names:
+        inputs.append(boolexpr.BooleanVariable(x))
+
+    or_objs = []
+    for x in reqs:
+        and_objs = []
+        for i in range(len(x)):
+            if x[i] is True:
+                and_objs.append(inputs[i])
+            elif x[i] is False:
+                and_objs.append(boolexpr.BooleanOperator(
+                        boolexpr.NOT, inputs[i]))
+        or_objs.append(boolexpr.BooleanOperator(boolexpr.AND, *and_objs))
+    expr = boolexpr.BooleanOperator(boolexpr.OR, *or_objs)
+    return expr
+
+def _shorten(reqs):
+    nreqs = []
+    i = 0
+    for x in reqs:
+        i += 1
+        close_matches = 0
+        for y in reqs[i:]:
+            found = None
+            nones = []
+            for j in range(len(x)):
+                if y[j] is not x[j]:
+                    if found is None:
+                        found = True
+                        place = j
+                    else:
+                        found = False
+                        break
+            if found is True:
+                temp = y[:]
+                temp[place] = None
+                nreqs.append(temp)
+                close_matches += 1
+        if close_matches == 0:
+            nreqs.append(x)
+
+    nnreqs = []
+    for x in nreqs:
+        if x not in nnreqs and (True in x or False in x):
+            nnreqs.append(x)
+    nreqs = nnreqs
+    nnreqs = []
+    ignore = []
+    for x in nreqs:
+        if x in ignore:
+            continue
+        ignore.append(x)
+        for y in nreqs:
+            if y in ignore:
+                continue
+            is_duplicate = True
+            for j in range(len(x)):
+                if x[j] is not None and x[j] != y[j]:
+                    is_duplicate = False
+                    break
+            if is_duplicate:
+                ignore.append(y)
+        nnreqs.append(x)
+    
+    return nnreqs
+
+def create_from_expression(expr):
+    input_names = expr.get_variables()
+    inlen = len(input_names)
+    rows = []
+    for i in range(2 ** inlen):
+        test_list = [bool(int(x)) for x in
+                     list(decimal_to_binary(i, inlen))]
+        test_dict = {}
+        for i in range(inlen):
+            test_dict[input_names[i]] = test_list[i]
+
+        if expr.test(**test_dict):
+            rows.append(test_list)
+    return Truthtable(input_names, rows)
 
 # On direct execution:
 if __name__ == '__main__':
@@ -57,10 +177,9 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         sys.exit()
 
-    exprs = parse_truthtable(sys.argv[1])
-    for name, expr in exprs.iteritems():
-        print name
-        booleanexpression.process_expression(expr)
-        print
-        print
+    for key, val in parse_truthtable(sys.argv[1]).iteritems():
+        print key
+        expr = shorten_truthtable(val).simplify()
+        print expr.express()
+        print shorten_truthtable(expr.create_truth_table()).simplify().express()
 
