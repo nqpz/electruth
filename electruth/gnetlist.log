@@ -1,0 +1,20 @@
+gEDA/gnetlist version 1.4.3.20081231
+gEDA/gnetlist comes with ABSOLUTELY NO WARRANTY; see COPYING for more details.
+This is free software, and you are welcome to redistribute it under certain
+conditions; please see the COPYING file for more details.
+
+Remember to check that your schematic has no errors using the drc2 backend.
+You can do it running 'gnetlist -g drc2 your_schematic.sch -o drc_output.txt'
+and seeing the contents of the file drc_output.txt.
+
+Read system-gafrc file [/etc/gEDA/system-gafrc]
+Did not find optional ~/.gEDA/gafrc file [/home/niels/.gEDA/gafrc]
+Did not find optional local gafrc file [/home/niels/Programming/electruth/electruth/gafrc]
+Read system-gnetlistrc file [/etc/gEDA/system-gnetlistrc]
+Did not find optional ~/.gEDA/gnetlistrc file [/home/niels/.gEDA/gnetlistrc]
+Did not find optional local gnetlistrc file [/home/niels/Programming/electruth/electruth/gnetlistrc]
+Loading schematic [/home/niels/HTX/DP/alpur/schematics-logic.sch]
+Did not find specified gafrc file [/home/niels/HTX/DP/alpur/gafrc]
+Read init scm file [/usr/share/gEDA/scheme/gnetlist.scm]
+Read geda scm file [/usr/share/gEDA/scheme/gnet-geda.scm]
+Read post traversal scm file [/usr/share/gEDA/scheme/gnetlist-post.scm]

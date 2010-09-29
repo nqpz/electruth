@@ -1,7 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import truthtable
+# electruth: a collection of boolean logic tools
+# Copyright (C) 2010  Niels Serup
+
+# This file is part of electruth.
+#
+# electruth is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# electruth is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with electruth.  If not, see <http://www.gnu.org/licenses/>.
+
+##[ Name        ]## electruth.booleanexpression
+##[ Maintainer  ]## Niels Serup <ns@metanohi.org>
+##[ Description ]## This is the core of electruth: the implementation
+                  # of boolean logic
 
 # Operator names
 _operator_names = ('not', 'and', 'or', 'xor', 'nand', 'nor', 'xnor')
@@ -183,14 +204,19 @@ class BooleanOperator(BooleanBaseObject):
     def get_name(self):
         return _translated_operator_names[self.func]
 
-    def create_truth_table(self):
+    def create_truthtable(self):
+        import electruth.truthtable as truthtable
         return truthtable.create_from_expression(self)
 
     def test(self, **keyvals):
         return _recursive_test_loop(self, **keyvals)
 
+    def ungroup(self):
+        return _ungroup_expression(self)
+
     def simplify(self):
-        return simplify_expression(self)
+        """Simplifies the expression. Will sometimes shorten it as well"""
+        return self.create_truthtable().shorten()
 
     def express(self):
         """Return a string formatted in a human-friendly way"""
@@ -198,6 +224,18 @@ class BooleanOperator(BooleanBaseObject):
 
     def __str__(self):
         return _recursive_show_loop(self)
+
+def parse_raw_expression(expr, always_return_op=False, simplify=False):
+    """Convert a raw expression into an internal format."""
+    for orig, new in _raw_aliases.iteritems():
+        expr = expr.replace(orig, new)
+    expr = expr.split()
+    complete = _parse_raw_part(expr)
+    if always_return_op and not complete.is_operator:
+        complete = BooleanOperator(OR, complete)
+    if simplify:
+        complete = complete.simplify()
+    return complete
 
 def _get_all_variables(op):
     vs = []
@@ -208,7 +246,9 @@ def _get_all_variables(op):
             vs.extend(_get_all_variables(x))
     return list(set(vs))
     
-def simplify_expression(expr):
+def _ungroup_expression(expr):
+    # Ungroup objects in operators with only one object (not counting
+    # NOT operators)
     objs = []
     if is_operator(expr):
         for x in expr.objs:
@@ -217,7 +257,7 @@ def simplify_expression(expr):
                         _operator_arg_limits[x.get_name()] == _infty:
                     objs.append(x.objs[0])
                 else:
-                    objs.append(simplify_expression(x))
+                    objs.append(_ungroup_expression(x))
             else:
                 objs.append(x)
     expr.objs = objs
@@ -298,23 +338,3 @@ def _parse_raw_part(expr, obj_history={}):
                 op = _inverted_operator_names[op]
             return BooleanOperator(op, *objs)
 
-def parse_raw_expression(expr):
-    """Convert a raw expression into an internal format."""
-    for orig, new in _raw_aliases.iteritems():
-        expr = expr.replace(orig, new)
-    expr = expr.split()
-    complete = _parse_raw_part(expr)
-    return complete
-
-# On direct execution:
-if __name__ == '__main__':
-    # Show a test
-    import sys
-    expr = ' '.join(sys.argv[1:])
-    if not expr:
-        expr = '(A and B) or (A and (C or !D))'
-
-    expr = parse_raw_expression(expr)
-    print expr.express()
-    print truthtable.shorten_truthtable(expr.create_truth_table()).simplify().express()
-    

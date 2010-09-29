@@ -1,0 +1,136 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# electruth: a collection of boolean logic tools
+# Copyright (C) 2010  Niels Serup
+
+# This file is part of electruth.
+#
+# electruth is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# electruth is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with electruth.  If not, see <http://www.gnu.org/licenses/>.
+
+##[ Name        ]## scripts.electruth
+##[ Maintainer  ]## Niels Serup <ns@metanohi.org>
+##[ Description ]## Runs the electruth command-line tool
+
+import sys
+import os.path
+from optparse import OptionParser
+
+try:
+    import electruth.various
+    # If this script has been called by electruth-local, it is
+    # already set. Only set it if it is not set.
+    if 'INSTALLED' not in dir():
+        INSTALLED = True
+except ImportError:
+    # electruth is not installed, trying an ugly fix. Considering that
+    # this executable is in the scripts/ directory, appending the
+    # directory one level up to sys.path should make importing possible.
+    basedir = os.path.split(os.path.dirname(os.path.realpath(__file__)))[0]
+    sys.path.insert(0, basedir)
+    INSTALLED = False
+
+import electruth.various as various
+from electruth.utility import Utility, _available_types
+import electruth.generalinformation as ginfo
+
+try:
+    from setproctitle import setproctitle
+except ImportError:
+    setproctitle = various.nothing
+
+class NewOptionParser(OptionParser):
+    def error(self, msg, done=False, **kwds):
+        various.error(msg, done, self.prog + ': error', **kwds)
+
+def list_available_types():
+    various.print_text_table(*_available_types,
+         header=('What', 'Type name', 'Filename ending'))
+    print '''
+Note: When you load a netlist or a schematic, make sure to create
+one or more "end nets". The netnames of these nets should be prefixed
+with ">" (e.g. ">A" (this will be renamed internally to "A", but it
+will retain its status as an "end net")).
+Boolean expressions will be found for these nets only.
+
+If a given input does not match any filename endings and has no
+explicit type, it is considered a basic boolean expression.'''
+    sys.exit()
+
+parser = NewOptionParser(
+    prog=ginfo.program_name,
+    usage='Usage: %prog [OPTION]... (PATH|EXPRESSION)...',
+    description=ginfo.program_description,
+    version=ginfo.version_info,
+    epilog='''\
+PATH|EXPRESSION can either be a path to a file containing data, or it
+can be a basic boolean expression given directly. Input files can be
+both truth tables (in tab-separated values or comma-separated
+values), netlists and gschem schematics. Filename endings will be used
+to get an idea of how to parse paths or expressions, but to be
+absolutely sure, you can use the --type option.\
+''')
+parser.add_option('-t', '--type', dest='type_given_pathorexprs',
+                  metavar = 'TYPE',
+                  action='append', default=[], nargs=2,
+                  help='set the type of PATH|EXPRESSION (should be \
+set just before it)')
+parser.add_option('-T', '--types-available', action='callback',
+                  callback=lambda *args: list_available_types(),
+                  help='list the available types, including any \
+eventual filename endings matching those types')
+parser.add_option('-A', '--no-auto-compare', dest='auto_compare',
+                  action='store_false',
+                  help='do not automatically compare expressions of \
+the same name (e.g. A_0 and A_1) if more than one is \
+given (named "auto compare" in your config file)')
+parser.add_option('-c', '--config-file', dest='config_file_path',
+                  metavar='PATH',
+                  help='set the path to your config file \
+(defaults to "$HOME/.electruth.config")',
+                  default=os.path.expanduser('~/.electruth.config'))
+parser.add_option('-q', '--quiet', dest='term_verbose',
+                  action='store_false',
+                  help='don\'t print error messages (named "verbose" in \
+your config file)')
+parser.add_option('-C', '--no-color-errors', dest='term_color_errors',
+                  action='store_false',
+                  help='do not attempt to print error messages in the \
+terminal in a red color (named "color errors" in your config file)')
+
+options, args = parser.parse_args()
+options = eval(str(options))
+options['error_function'] = parser.error
+
+pathorexprs = options['type_given_pathorexprs']
+del options['type_given_pathorexprs']
+[pathorexprs.append(
+        (x.find('.') != -1 and
+         x.split('.')[-1] or
+         None, x)) for x in args]
+options['inputs'] = tuple(pathorexprs)
+
+setproctitle(parser.prog)
+
+# Create and run
+u = Utility(**options)
+try:
+    u.start()
+except (EOFError, KeyboardInterrupt):
+    pass
+except Exception:
+    import traceback
+    traceback.print_exc()
+finally:
+    u.end()

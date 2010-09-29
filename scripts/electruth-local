@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# electruth: a collection of boolean logic tools
+# Copyright (C) 2010  Niels Serup
+
+# This file is part of electruth.
+#
+# electruth is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# electruth is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with electruth.  If not, see <http://www.gnu.org/licenses/>.
+
+##[ Name        ]## scripts.electruth-local
+##[ Maintainer  ]## Niels Serup <ns@metanohi.org>
+##[ Description ]## Runs the electruth command-line tool without
+                  # loading any eventual global package
+
+# This script runs the electruth script, but it uses the local files
+# even if electruth is installed. This makes developing easier.
+
+import sys
+import os.path
+progdir = os.path.dirname(os.path.realpath(__file__))
+basedir = os.path.split(progdir)[0]
+sys.path.insert(0, basedir)
+
+INSTALLED = False
+execfile(os.path.join(progdir, 'electruth'))

@@ -1,0 +1,4 @@
+include *.txt
+include scripts/electruth-local
+include logo/electruth-logo.svg
+include logo/convert-to-png.sh

@@ -1,9 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import math
+# electruth: a collection of boolean logic tools
+# Copyright (C) 2010  Niels Serup
 
-import booleanexpression as boolexpr
+# This file is part of electruth.
+#
+# electruth is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# electruth is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with electruth.  If not, see <http://www.gnu.org/licenses/>.
+
+##[ Name        ]## electruth.truthtable
+##[ Maintainer  ]## Niels Serup <ns@metanohi.org>
+##[ Description ]## Controls truth tables
+
+import math
+import electruth.booleanexpression as boolexpr
 
 def decimal_to_binary(dec, min_size=None):
     if dec == 0:
@@ -17,14 +38,15 @@ def decimal_to_binary(dec, min_size=None):
     return string
 
 class Truthtable(object):
-    names=[]
-    rows=[]
-
+    """A truthtable with only one output"""
     def __init__(self, names, rows):
         self.names = names
         self.rows = rows
 
-def parse_truthtable(path):
+    def shorten(self):
+        return _shorten_truthtable(self).ungroup()
+
+def parse_raw_truthtable(path, delimiter='\t', shorten=True):
     outputs = []
     input_numbers = []
     output_numbers = []
@@ -34,7 +56,7 @@ def parse_truthtable(path):
     f = open(path, 'r')
 
     i = 0
-    for name in f.readline().strip().split('\t'):
+    for name in f.readline().strip().split(delimiter):
         tmp = ''
         if name.startswith('<'):
             input_names.append(name[1:])
@@ -45,7 +67,7 @@ def parse_truthtable(path):
             outputs.append([])
         i += 1
     for line in f:
-        data = [int(x) for x in line.strip().split('\t')]
+        data = [int(x) for x in line.strip().split(delimiter)]
 
         c = 0
         for i in output_numbers:
@@ -67,10 +89,26 @@ def parse_truthtable(path):
                 tt.append(None)
             for y in x:
                 tt[y[0]] = bool(y[1])
-        final[output_names[i]] = Truthtable(input_names, t)
+        final[output_names[i]] = Truthtable(input_names, t).shorten()
     return final
 
-def shorten_truthtable(table):
+def create_from_expression(expr):
+    input_names = expr.get_variables()
+    inlen = len(input_names)
+    rows = []
+    for i in range(2 ** inlen):
+        test_list = [bool(int(x)) for x in
+                     list(decimal_to_binary(i, inlen))]
+        test_dict = {}
+        for i in range(inlen):
+            test_dict[input_names[i]] = test_list[i]
+
+        if expr.test(**test_dict):
+            rows.append(test_list)
+    return Truthtable(input_names, rows)
+
+
+def _shorten_truthtable(table):
     reqs = table.rows
     while True:
         nreqs = _shorten(reqs)
@@ -155,31 +193,4 @@ def _shorten(reqs):
         nnreqs.append(x)
     
     return nnreqs
-
-def create_from_expression(expr):
-    input_names = expr.get_variables()
-    inlen = len(input_names)
-    rows = []
-    for i in range(2 ** inlen):
-        test_list = [bool(int(x)) for x in
-                     list(decimal_to_binary(i, inlen))]
-        test_dict = {}
-        for i in range(inlen):
-            test_dict[input_names[i]] = test_list[i]
-
-        if expr.test(**test_dict):
-            rows.append(test_list)
-    return Truthtable(input_names, rows)
-
-# On direct execution:
-if __name__ == '__main__':
-    import sys
-    if len(sys.argv) == 1:
-        sys.exit()
-
-    for key, val in parse_truthtable(sys.argv[1]).iteritems():
-        print key
-        expr = shorten_truthtable(val).simplify()
-        print expr.express()
-        print shorten_truthtable(expr.create_truth_table()).simplify().express()
 
