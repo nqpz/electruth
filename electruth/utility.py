@@ -59,7 +59,7 @@ class Utility(SettingsParser):
 
         self.do_compare = len(self.inputs) > 1 and self.auto_compare
 
-        self.exprs = {}
+        self.exprs = []
 
     def error(self, msg, done=None):
         if self.term_verbose:
@@ -71,12 +71,12 @@ class Utility(SettingsParser):
     def add_expression(self, o_name, expr):
         if self.do_compare:
             name = o_name + '_0'
-        keys = self.exprs.keys()
+        names = [x[0] for x in self.exprs]
         i = 0
-        while name in keys:
+        while name in names:
             i += 1
             name = o_name + '_%d' % i
-        self.exprs[name] = expr
+        self.exprs.append((name, o_name, expr))
 
     def add_expressions(self, **exprs):
         for key, val in exprs.iteritems():
@@ -84,6 +84,7 @@ class Utility(SettingsParser):
 
     def start(self):
         self.load_inputs()
+        self.exprs.sort()
         self.print_exprs()
 
     def load_inputs(self):
@@ -113,10 +114,27 @@ class Utility(SettingsParser):
                     name, boolexpr.parse_raw_expression(data, False, True))
 
     def print_exprs(self):
-        exprs = [x for x in self.exprs.iteritems()]
-        exprs.sort()
-        for name, expr in exprs:
-            print name + ':', expr
+        prevs = []
+        def maybe_compare():
+            if len(prevs) > 1:
+                i = 1
+                for x in prevs[:-1]:
+                    for y in prevs[i:]:
+                        print ' \'-', x[0], 'matches', y[0] + '?', x[2].match(y[2])
+                    i += 1
+                print
+
+        prev = self.exprs[0]
+        for x in self.exprs:
+            if x[1] == prev[1]:
+                prevs.append(x)
+            else:
+                maybe_compare()
+                prevs = [x]
+
+            print x[0] + ':', x[2]
+            prev = x
+        maybe_compare()
 
     def end(self):
         pass

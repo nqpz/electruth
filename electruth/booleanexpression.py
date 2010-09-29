@@ -120,21 +120,12 @@ _raw_aliases = {
 class BooleanExpressionError(Exception):
     pass
 
-def is_operator(obj):
-    return 'func' in obj.__dict__ and 'objs' in obj.__dict__
-
-def is_multi_operator(obj):
-    return is_operator(obj) and \
-        _operator_arg_limits[obj.get_name()] == _infty
-
-def is_variable(obj):
-    return 'name' in obj.__dict__
 
 def _recursive_show_loop(op):
     text = '%s(' % op.get_name()
     t_objs = []
     for x in op.objs:
-        if is_operator(x):
+        if x.is_operator:
             t_objs.append(_recursive_show_loop(x))
         else:
             t = x.name
@@ -143,8 +134,27 @@ def _recursive_show_loop(op):
     text += ')'
     return text
 
+def _match_two(a, b):
+    if a == b or (a.is_variable and b.is_variable and a.name == b.name):
+        return True
+    elif a.is_operator and b.is_operator and a.func == b.func and \
+            len(a.objs) == len(b.objs):
+        used = []
+        for i in range(len(a.objs)):
+            ok = False
+            for j in range(len(a.objs)):
+                if j not in used and _match_two(a.objs[i], b.objs[j]):
+                    used.append(j)
+                    ok = True
+                    break
+            if not ok:
+                return False
+        return True
+    else:
+        return False
+
 def _recursive_express_loop(op):
-    if not is_operator(op):
+    if not op.is_operator:
         return op.name
     
     if op.func == NOT:
@@ -160,22 +170,24 @@ def _recursive_express_loop(op):
 def _recursive_test_loop(op, **keyvals):
     objs = []
     for x in op.objs:
-        if is_operator(x):
+        if x.is_operator:
             objs.append(_recursive_test_loop(x, **keyvals))
         else:
             objs.append(keyvals[x.get_name()])
     return op.func(*objs)
 
 class BooleanBaseObject(object):
-    def is_operator(self):
-        return False
-
-class BooleanVariable(BooleanBaseObject):
-    def __init__(self, name):
-        self.name = name
+    is_operator=False
+    is_variable=False
 
     def get_name(self):
         return self.name
+
+class BooleanVariable(BooleanBaseObject):
+    is_variable=True
+
+    def __init__(self, name):
+        self.name = name
 
     def simplify(self):
         return self
@@ -184,6 +196,8 @@ class BooleanVariable(BooleanBaseObject):
         return self.name
 
 class BooleanOperator(BooleanBaseObject):
+    is_operator=True
+
     def __init__(self, kind, *objs):
         self.set_kind(kind)
         self.objs = objs
@@ -200,6 +214,9 @@ class BooleanOperator(BooleanBaseObject):
 
     def get_variables(self):
         return _get_all_variables(self)
+
+    def is_multi_operator(self):
+        return _operator_arg_limits[obj.get_name()] == _infty
 
     def get_name(self):
         return _translated_operator_names[self.func]
@@ -218,6 +235,9 @@ class BooleanOperator(BooleanBaseObject):
         """Simplifies the expression. Will sometimes shorten it as well"""
         return self.create_truthtable().shorten()
 
+    def match(self, other):
+        return _match_two(self, other)
+    
     def express(self):
         """Return a string formatted in a human-friendly way"""
         return _recursive_express_loop(self)
@@ -240,7 +260,7 @@ def parse_raw_expression(expr, always_return_op=False, simplify=False):
 def _get_all_variables(op):
     vs = []
     for x in op.objs:
-        if is_variable(x):
+        if x.is_variable:
             vs.append(x.get_name())
         else:
             vs.extend(_get_all_variables(x))
@@ -250,9 +270,9 @@ def _ungroup_expression(expr):
     # Ungroup objects in operators with only one object (not counting
     # NOT operators)
     objs = []
-    if is_operator(expr):
+    if expr.is_operator:
         for x in expr.objs:
-            if is_operator(x):
+            if x.is_operator:
                 if len(x.objs) == 1 and \
                         _operator_arg_limits[x.get_name()] == _infty:
                     objs.append(x.objs[0])
