@@ -65,7 +65,6 @@ class SettingsParser(object):
                         n_key = ok_config_translations[key]
                         if n_key is not None:
                             key = n_key
-                    if key not in self.__dict__:
-                        self.__setattr__(key, conf[o_key])
+                        self.set_if_nil(key, conf[o_key])
             except IOError:
                 pass

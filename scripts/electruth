@@ -95,6 +95,11 @@ parser.add_option('-A', '--no-auto-compare', dest='auto_compare',
                   help='do not automatically compare expressions of \
 the same name (e.g. A_0 and A_1) if more than one is \
 given (named "auto compare" in your config file)')
+parser.add_option('-e', '--express', dest='express_type',
+                  metavar='CHOICE',
+                  help='choose how to express boolean expressions. \
+Possible values are: "basic" (default), "internal", "bool" and "math" \
+(named "express" in your config file)'),
 parser.add_option('-c', '--config-file', dest='config_file_path',
                   metavar='PATH',
                   help='set the path to your config file \

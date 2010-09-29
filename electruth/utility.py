@@ -44,7 +44,8 @@ supported)', 'net', '.net')
 _config_file_translations = {
     'verbose': 'term_verbose',
     'color errors': 'term_color_errors',
-    'auto compare': 'auto_compare'
+    'auto compare': 'auto_compare',
+    'express': 'express_type'
 }
 
 class Utility(SettingsParser):
@@ -56,6 +57,7 @@ class Utility(SettingsParser):
         self.set_if_nil('term_verbose', True)
         self.set_if_nil('term_color_errors', True)
         self.set_if_nil('auto_compare', True)
+        self.set_if_nil('express_type', 'basic')
 
         self.do_compare = len(self.inputs) > 1 and self.auto_compare
 
@@ -71,11 +73,13 @@ class Utility(SettingsParser):
     def add_expression(self, o_name, expr):
         if self.do_compare:
             name = o_name + '_0'
-        names = [x[0] for x in self.exprs]
-        i = 0
-        while name in names:
-            i += 1
-            name = o_name + '_%d' % i
+            names = [x[0] for x in self.exprs]
+            i = 0
+            while name in names:
+                i += 1
+                name = o_name + '_%d' % i
+        else:
+            name = o_name
         self.exprs.append((name, o_name, expr))
 
     def add_expressions(self, **exprs):
@@ -114,6 +118,10 @@ class Utility(SettingsParser):
                     name, boolexpr.parse_raw_expression(data, False, True))
 
     def print_exprs(self):
+        if not self.exprs:
+            print 'No expressions given'
+            return
+
         prevs = []
         def maybe_compare():
             if len(prevs) > 1:
@@ -132,7 +140,7 @@ class Utility(SettingsParser):
                 maybe_compare()
                 prevs = [x]
 
-            print x[0] + ':', x[2]
+            print x[0] + ':', x[2].express(self.express_type)
             prev = x
         maybe_compare()
 

@@ -114,7 +114,10 @@ _raw_aliases = {
     '^': ' xor ',
     'nand': 'not and',
     'nor': 'not or',
-    'xnor': 'not xor'
+    'xnor': 'not xor',
+    '∨': ' or ',
+    '∧': ' and ',
+    '¬': ' not '
 }
 
 class BooleanExpressionError(Exception):
@@ -153,17 +156,26 @@ def _match_two(a, b):
     else:
         return False
 
-def _recursive_express_loop(op):
+def _recursive_express_loop(op, and_symbol, or_symbol, not_symbol, not_after=False):
     if not op.is_operator:
         return op.name
     
     if op.func == NOT:
-        return '!' + _recursive_express_loop(op.objs[0])
+        rec = _recursive_express_loop(
+            op.objs[0], and_symbol, or_symbol, not_symbol, not_after)
+        if not_after:
+            return rec + (not_symbol or '!')
+        else:
+            return (not_symbol or '!') + rec
     text = '('
     t_objs = []
     for x in op.objs:
-        t_objs.append(_recursive_express_loop(x))
-    text += (' %s ' % op.get_name().upper()).join(t_objs)
+        t_objs.append(_recursive_express_loop(
+            x, and_symbol, or_symbol,
+            not_symbol, not_after))
+    opname = op.func == AND and and_symbol or op.func == OR and \
+        or_symbol or op.get_name().upper()
+    text += (' %s ' % opname).join(t_objs)
     text += ')'
     return text
 
@@ -183,14 +195,17 @@ class BooleanBaseObject(object):
     def get_name(self):
         return self.name
 
+    def express(self, typ=None):
+        return str(self)
+
+    def simplify(self):
+        return self
+
 class BooleanVariable(BooleanBaseObject):
     is_variable=True
 
     def __init__(self, name):
         self.name = name
-
-    def simplify(self):
-        return self
 
     def __str__(self):
         return self.name
@@ -238,9 +253,27 @@ class BooleanOperator(BooleanBaseObject):
     def match(self, other):
         return _match_two(self, other)
     
-    def express(self):
+    def express(self, typ='basic'):
         """Return a string formatted in a human-friendly way"""
-        return _recursive_express_loop(self)
+        if typ == 'internal':
+            return str(self)
+        else:
+            _not_after = False
+            if typ == 'math':
+                _and = '∧'
+                _or = '∨'
+                _not = '¬'
+            elif typ == 'bool':
+                _and = '·'
+                _or = '+'
+                _not = '´'
+                _not_after = True
+            else:
+                _and = None
+                _or = None
+                _not = None
+            return _recursive_express_loop(
+                self, _and, _or, _not, _not_after)
 
     def __str__(self):
         return _recursive_show_loop(self)
