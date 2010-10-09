@@ -32,61 +32,42 @@ import electruth.various as various
 #####################################################################
 
 # Type of logic gate with number of inputs; may contain erroneous
-# information. It is probably best to use the basic devices (7408 for
-# AND, 7432 for OR, 7404 for NOT, 7486 for XOR, 7400 for NAND, 7402
-# for NOR, and 74266 for XNOR).
+# information. It is probably best to use the basic devices (be it
+# CMOS or TTL). Gates with more than one output are currently not
+# supported. Gates with more than two inputs could easily be added,
+# but they are not supported yet.
+
+_cmos_two_inputs = (1, 2, 5, 6, 8, 9, 12, 13)
+_ttl_two_inputs = (1, 2, 4, 5, 9, 10, 12, 13)
+_not_inputs = (1, 3, 5, 9, 11, 13)
 _gates_information = {
-    '7408': (AND, 2),
-    '7409': (AND, 2),
-    '74130': (AND, 2),
-    '74131': (AND, 2),
-    '7411': (AND, 3),
-    '7415': (AND, 3),
-    '7421': (AND, 4),
+    '4081': (AND, _cmos_two_inputs),
+    '7408': (AND, _ttl_two_inputs),
+    '7409': (AND, _ttl_two_inputs),
 
-    '7432': (OR, 2),
-    '744075': (OR, 3),
+    '4071': (OR, _cmos_two_inputs),
+    '7432': (OR, _ttl_two_inputs),
 
-    '7404': (NOT, 1),
-    '7405': (NOT, 1),
-    '7406': (NOT, 1),
-    '7414': (NOT, 1),
-    '7416': (NOT, 1),
-    '7419': (NOT, 1),
+    '4069': (NOT, _not_inputs),
+    '4049': (NOT, (3, 5, 7, 9, 11, 14)),
+    '7404': (NOT, _not_inputs),
+    '7405': (NOT, _not_inputs),
+    '7414': (NOT, _not_inputs),
 
-    '7486': (XOR, 2),
-    '74136': (XOR, 2),
-    '74386': (XOR, 2),
+    '4070': (XOR, _cmos_two_inputs),
+    '4030': (XOR, _cmos_two_inputs),
+    '7486': (XOR, _ttl_two_inputs),
 
-    '7400': (NAND, 2),
-    '7401': (NAND, 2),
-    '7403': (NAND, 2),
-    '7424': (NAND, 2),
-    '7426': (NAND, 2),
-    '7410': (NAND, 3),
-    '7412': (NAND, 3),
-    '7413': (NAND, 4),
-    '7418': (NAND, 4),
-    '7420': (NAND, 4),
-    '7422': (NAND, 4),
-    '7430': (NAND, 8),
-    '74134': (NAND, 12),
-    '74133': (NAND, 13),
+    '4011': (NAND, _cmos_two_inputs),    
+    '7400': (NAND, _ttl_two_inputs),
+    '7403': (NAND, _ttl_two_inputs),
+    '74132': (NAND, _ttl_two_inputs),
 
-    '7402': (NOR, 2),
-    '7428': (NOR, 2),
-    '7433': (NOR, 2),
-    '7436': (NOR, 2),
-    '74128': (NOR, 2),
-    '7427': (NOR, 3),
-    '7423': (NOR, 4),
-    '7425': (NOR, 4),
-    '74232': (NOR, 4),
-    '744002': (NOR, 4),
-    '74260': (NOR, 5),
+    '4001': (NOR, _cmos_two_inputs),
+    '7402': (NOR, (2, 3, 5, 6, 8, 9, 11, 12)),
 
-    '74266': (XNOR, 2),
-    '747266': (XNOR, 2)
+    '4077': (XNOR, _cmos_two_inputs),
+    '74266': (XNOR, _cmos_two_inputs) # Odd but true
 }
 
 #####################################################################
@@ -99,19 +80,19 @@ _gates_information = {
 
 # This may be easier to understand with a little graphical example:
 
-#        ,_____           ,------------ Net with 1 output (7408)
-# [...]__|     \          v             and 2 inputs (7432 and 7404)
-# [...]__| 7408 |-------------,    ___
+#        ,_____           ,------------ Net with 1 output (4081)
+# [...]__|     \          v             and 2 inputs (4071 and 4069)
+# [...]__| 4081 |-------------,    ___
 #        |_____/              |   |   \__
 # ,___________________________|   |      \
-# |     ,______               '---| 7404  >----[...]
+# |     ,______               '---| 4069  >----[...]
 # |_____\      \                  |    __/
-# ,_____ | 7432 |----[...]        |___/
+# ,_____ | 4071 |----[...]        |___/
 # |     /______/
 # |___________________________,
 #        ,_____               |
-# [...]__|     \              | <------ Net with 1 output (7408)
-# [...]__| 7408 |-------------'         and 1 input (7432)
+# [...]__|     \              | <------ Net with 1 output (4081)
+# [...]__| 4081 |-------------'         and 1 input (4071)
 #        |_____/
 
 #####################################################################
@@ -119,13 +100,13 @@ _gates_information = {
 class Gate(object):
     def __init__(self, name, device):
         try:
-            func, inputs_num = _gates_information[device]
+            func, input_nums = _gates_information[device]
         except KeyError:
             raise Exception('logic gate %s is not recognized (is it \
 even a logic gate?)' % device)
         self.name = name
         self.func = func
-        self.input_numbers = range(1, inputs_num + 1)
+        self.input_numbers = input_nums
         self.pins = [] # GatePin objects will append themselves to
                        # this list
 
