@@ -140,7 +140,7 @@ class Utility(SettingsParser):
                 maybe_compare()
                 prevs = [x]
 
-            print x[0] + ':', x[2].express(self.express_type)
+            print x[0] + ' =', x[2].express(self.express_type)
             prev = x
         maybe_compare()
 

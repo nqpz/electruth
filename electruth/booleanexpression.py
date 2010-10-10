@@ -156,23 +156,20 @@ def _match_two(a, b):
     else:
         return False
 
-def _recursive_express_loop(op, and_symbol, or_symbol, not_symbol, not_after=False):
+def _recursive_express_loop(op, and_symbol, or_symbol, not_symbol):
     if not op.is_operator:
         return op.name
     
     if op.func == NOT:
         rec = _recursive_express_loop(
-            op.objs[0], and_symbol, or_symbol, not_symbol, not_after)
-        if not_after:
-            return rec + (not_symbol or '!')
-        else:
-            return (not_symbol or '!') + rec
+            op.objs[0], and_symbol, or_symbol, not_symbol)
+        return (not_symbol or '!%s') % rec
     text = '('
     t_objs = []
     for x in op.objs:
         t_objs.append(_recursive_express_loop(
             x, and_symbol, or_symbol,
-            not_symbol, not_after))
+            not_symbol))
     opname = op.func == AND and and_symbol or op.func == OR and \
         or_symbol or op.get_name().upper()
     text += (' %s ' % opname).join(t_objs)
@@ -258,22 +255,24 @@ class BooleanOperator(BooleanBaseObject):
         if typ == 'internal':
             return str(self)
         else:
-            _not_after = False
             if typ == 'math':
                 _and = '∧'
                 _or = '∨'
-                _not = '¬'
+                _not = '¬%s'
             elif typ == 'bool':
                 _and = '·'
                 _or = '+'
-                _not = '´'
-                _not_after = True
+                _not = '%s´'
+            elif typ == 'latex-bool':
+                _and = '\cdot'
+                _or = '+'
+                _not = '\overline{%s}'
             else:
                 _and = None
                 _or = None
                 _not = None
             return _recursive_express_loop(
-                self, _and, _or, _not, _not_after)
+                self, _and, _or, _not)
 
     def __str__(self):
         return _recursive_show_loop(self)

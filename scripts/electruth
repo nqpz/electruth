@@ -98,8 +98,8 @@ given (named "auto compare" in your config file)')
 parser.add_option('-e', '--express', dest='express_type',
                   metavar='CHOICE',
                   help='choose how to express boolean expressions. \
-Possible values are: "basic" (default), "internal", "bool" and "math" \
-(named "express" in your config file)'),
+Possible values are: "basic" (default), "internal", "bool", "math" \
+and "latex-bool" (named "express" in your config file)'),
 parser.add_option('-c', '--config-file', dest='config_file_path',
                   metavar='PATH',
                   help='set the path to your config file \
