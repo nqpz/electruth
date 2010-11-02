@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# shadowloss: a stickman-oriented game against time
+# electruth: a stickman-oriented game against time
 # Copyright (C) 2010  Niels Serup
 
-# This file is part of shadowloss.
+# This file is part of electruth.
 #
-# shadowloss is free software: you can redistribute it and/or modify
+# electruth is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# shadowloss is distributed in the hope that it will be useful,
+# electruth is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with shadowloss.  If not, see <http://www.gnu.org/licenses/>.
+# along with electruth.  If not, see <http://www.gnu.org/licenses/>.
 
-##[ Name        ]## shadowloss.various
+##[ Name        ]## electruth.various
 ##[ Maintainer  ]## Niels Serup <ns@metanohi.org>
 ##[ Description ]## Various minor (but still important) parts
 ##[ Start date  ]## 2010 September 13
