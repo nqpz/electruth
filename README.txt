@@ -3,8 +3,6 @@
 electruth
 =========
 
-electruth is **NOT** released yet.
-
 electruth is a collection of boolean logic tools. It can be used as
 both a command-line tool and a Python library. It understands boolean
 algebra (to some extent) and can be used to simplify boolean
@@ -114,6 +112,12 @@ electruth is written in Python and uses Git for branches. To get the
 latest branch, get it from gitorious.org like this::
 
   $ git clone git://gitorious.org/electruth/electruth.git
+
+
+Logo
+====
+
+electruth's current logo has been put into the public domain.
 
 
 This document
