@@ -78,7 +78,7 @@ def parse_raw_truthtable(path, delimiter='\t', shorten=True):
                 outputs[c].append(t)
             c += 1
     f.close()
-
+    
     final = {}
     for i in range(len(outputs)):
         t = []
@@ -89,7 +89,10 @@ def parse_raw_truthtable(path, delimiter='\t', shorten=True):
                 tt.append(None)
             for y in x:
                 tt[y[0]] = bool(y[1])
-        final[output_names[i]] = Truthtable(input_names, t).shorten()
+        if shorten:
+            final[output_names[i]] = Truthtable(input_names, t).shorten()
+        else:
+            final[output_names[i]] = Truthtable(input_names, t)
     return final
 
 def create_from_expression(expr):
