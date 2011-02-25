@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # qvikconfig: read and write simple config files
-# Copyright (C) 2010  Niels Serup
+# Copyright (C) 2010, 2011  Niels Serup
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Version:...... 0.1.0
+# Version:...... 0.1.1
 # Maintainer:... Niels Serup <ns@metanohi.org>
 # Website:...... http://metanohi.org/projects/qvikconfig/
 # Development:.. http://gitorious.org/qvikconfig
@@ -142,10 +142,10 @@ properties, equal signs. While spaces and tabs are just fine, newlines
 Version information
 -------------------
 
-This is version 0.1.0 of qvikconfig. New releases are made available
+This is version 0.1.1 of qvikconfig. New releases are made available
 online at the website mentioned earlier.
 
-Copyright (C) 2010  Niels Serup
+Copyright (C) 2010, 2011  Niels Serup
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
@@ -154,6 +154,15 @@ There is NO WARRANTY, to the extent permitted by law.
 
 # Constants
 _config_comment_regex = re.compile(r'#.*')
+try:
+    _strtyp = basetstring # Python 2.x
+except NameError:
+    _strtyp = str # Python 3.x
+try:
+    {}.iteritems
+    _iteritems = lambda x: x.iteritems()
+except AttributeError:
+    _iteritems = lambda x: x.items()
 
 # The parser class
 class _QvikParser(dict):
@@ -183,7 +192,7 @@ class _QvikParser(dict):
                 else:
                     raise TypeError('missing arguments')
             else:
-                if not isinstance(dat, basestring):
+                if not isinstance(dat, _strtyp):
                     raise TypeError('data must be a string')
         else:
             dat = fil2dat(fil)
@@ -350,7 +359,7 @@ def _convert_back(dat, bads, regexes=None):
         return 'true'
     if dat is False:
         return 'false'
-    if isinstance(dat, basestring):
+    if isinstance(dat, _strtyp):
         # Quote the string if it contains forbidden letters or patterns
         ok = True
         for l in dat:
@@ -371,8 +380,8 @@ def _convert_back(dat, bads, regexes=None):
 
 def _yield_dump(in_dict):
     # Dump dict data one entry at a time
-    for o_prop, o_vals in in_dict.iteritems():
-        if not isinstance(o_prop, basestring):
+    for o_prop, o_vals in _iteritems(in_dict):
+        if not isinstance(o_prop, _strtyp):
             raise TypeError('identifiers must be strings')
         prop = _convert_back(o_prop, _bads_prop)
         if isinstance(o_vals, list):

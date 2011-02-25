@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # electruth: a collection of boolean logic tools
-# Copyright (C) 2010  Niels Serup
+# Copyright (C) 2010, 2011  Niels Serup
 
 # This file is part of electruth.
 #

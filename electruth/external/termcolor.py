@@ -1,30 +1,38 @@
-# Copyright (C) 2008-2009 Konstantin Lepa <konstantin.lepa@gmail.com>.
+# coding: utf-8
+# Copyright (c) 2008-2011 Volvox Development Team
 #
-# This file is part of termcolor.
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# termcolor is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by the Free
-# Software Foundation; either version 3, or (at your option) any later
-# version.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
-# termcolor is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-# more details.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 #
-# You should have received a copy of the GNU General Public License
-# along with termcolor.  If not, see <http://www.gnu.org/licenses/>.
+# Author: Konstantin Lepa <konstantin.lepa@gmail.com>
 
 """ANSII Color formatting for output in terminal."""
 
+from __future__ import print_function
 import os
 
 
-__ALL__ = [ 'colored' ]
+__ALL__ = [ 'colored', 'cprint' ]
 
+VERSION = (1, 1, 0)
 
 ATTRIBUTES = dict(
-        zip([
+        list(zip([
             'bold',
             'dark',
             '',
@@ -34,14 +42,14 @@ ATTRIBUTES = dict(
             'reverse',
             'concealed'
             ],
-            range(1, 9)
-            )
+            list(range(1, 9))
+            ))
         )
 del ATTRIBUTES['']
 
 
 HIGHLIGHTS = dict(
-        zip([
+        list(zip([
             'on_grey',
             'on_red',
             'on_green',
@@ -51,13 +59,13 @@ HIGHLIGHTS = dict(
             'on_cyan',
             'on_white'
             ],
-            range(40, 48)
-            )
+            list(range(40, 48))
+            ))
         )
 
 
 COLORS = dict(
-        zip([
+        list(zip([
             'grey',
             'red',
             'green',
@@ -67,8 +75,8 @@ COLORS = dict(
             'cyan',
             'white',
             ],
-            range(30, 38)
-            )
+            list(range(30, 38))
+            ))
         )
 
 
@@ -107,45 +115,54 @@ def colored(text, color=None, on_color=None, attrs=None):
     return text
 
 
+def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
+    """Print colorize text.
+
+    It accepts arguments of print function.
+    """
+
+    print((colored(text, color, on_color, attrs)), **kwargs)
+
+
 if __name__ == '__main__':
-    print 'Current terminal type: ', os.getenv('TERM')
-    print 'Test basic colors:'
-    print colored('Grey color', 'grey')
-    print colored('Red color', 'red')
-    print colored('Green color', 'green')
-    print colored('Yellow color', 'yellow')
-    print colored('Blue color', 'blue')
-    print colored('Magenta color', 'magenta')
-    print colored('Cyan color', 'cyan')
-    print colored('White color', 'white')
-    print '-' * 78
+    print('Current terminal type: %s' % os.getenv('TERM'))
+    print('Test basic colors:')
+    cprint('Grey color', 'grey')
+    cprint('Red color', 'red')
+    cprint('Green color', 'green')
+    cprint('Yellow color', 'yellow')
+    cprint('Blue color', 'blue')
+    cprint('Magenta color', 'magenta')
+    cprint('Cyan color', 'cyan')
+    cprint('White color', 'white')
+    print(('-' * 78))
 
-    print 'Test highlights:'
-    print colored('On grey color', on_color='on_grey')
-    print colored('On red color', on_color='on_red')
-    print colored('On green color', on_color='on_green')
-    print colored('On yellow color', on_color='on_yellow')
-    print colored('On blue color', on_color='on_blue')
-    print colored('On magenta color', on_color='on_magenta')
-    print colored('On cyan color', on_color='on_cyan')
-    print colored('On white color', color='grey', on_color='on_white')
-    print '-' * 78
+    print('Test highlights:')
+    cprint('On grey color', on_color='on_grey')
+    cprint('On red color', on_color='on_red')
+    cprint('On green color', on_color='on_green')
+    cprint('On yellow color', on_color='on_yellow')
+    cprint('On blue color', on_color='on_blue')
+    cprint('On magenta color', on_color='on_magenta')
+    cprint('On cyan color', on_color='on_cyan')
+    cprint('On white color', color='grey', on_color='on_white')
+    print('-' * 78)
 
-    print 'Test attributes:'
-    print colored('Bold grey color', 'grey', attrs=['bold'])
-    print colored('Dark red color', 'red', attrs=['dark'])
-    print colored('Underline green color', 'green', attrs=['underline'])
-    print colored('Blink yellow color', 'yellow', attrs=['blink'])
-    print colored('Reversed blue color', 'blue', attrs=['reverse'])
-    print colored('Concealed Magenta color', 'magenta', attrs=['concealed'])
-    print colored('Bold underline reverse cyan color', 'cyan',
+    print('Test attributes:')
+    cprint('Bold grey color', 'grey', attrs=['bold'])
+    cprint('Dark red color', 'red', attrs=['dark'])
+    cprint('Underline green color', 'green', attrs=['underline'])
+    cprint('Blink yellow color', 'yellow', attrs=['blink'])
+    cprint('Reversed blue color', 'blue', attrs=['reverse'])
+    cprint('Concealed Magenta color', 'magenta', attrs=['concealed'])
+    cprint('Bold underline reverse cyan color', 'cyan',
             attrs=['bold', 'underline', 'reverse'])
-    print colored('Dark blink concealed white color', 'white',
+    cprint('Dark blink concealed white color', 'white',
             attrs=['dark', 'blink', 'concealed'])
-    print '-' * 78
+    print(('-' * 78))
 
-    print 'Test mixing:'
-    print colored('Underline red on grey color', 'red', 'on_grey',
+    print('Test mixing:')
+    cprint('Underline red on grey color', 'red', 'on_grey',
             ['underline'])
-    print colored('Reversed green on red color', 'green', 'on_red', ['reverse'])
+    cprint('Reversed green on red color', 'green', 'on_red', ['reverse'])
 

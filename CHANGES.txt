@@ -1,1 +1,2 @@
+v0.1.1, 2011-02-25 -- Bug fix release, final release for Python 2.x
 v0.1.0, 2010-11-05 -- Initial release
