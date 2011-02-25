@@ -1,15 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from distutils.core import setup
 import os
 
-ginfo_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                          'electruth', 'generalinformation.py')
-execfile(ginfo_file)
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+
+import electruth.generalinformation as ginfo
 
 readme = open('README.txt').read()
 conf = dict(
-    name=program_name,
-    version=version_text,
+    name=ginfo.program_name,
+    version=ginfo.version_text,
     author='Niels Serup',
     author_email='ns@metanohi.org',
     packages=['electruth', 'electruth.external'],
@@ -17,14 +17,14 @@ conf = dict(
     requires=['qvikconfig'],
     url='http://metanohi.org/projects/electruth/',
     license='GPLv3+',
-    description=program_description,
-    classifiers=['Development Status :: 3 - Alpha',
+    description=ginfo.program_description,
+    classifiers=['Development Status :: 4 - Beta',
                  'Intended Audience :: End Users/Desktop',
                  'Intended Audience :: Developers',
                  'License :: OSI Approved :: GNU General Public License (GPL)',
                  'License :: DFSG approved',
                  'Operating System :: OS Independent',
-                 'Programming Language :: Python',
+                 'Programming Language :: Python :: 3.1',
                  'Environment :: Console',
                  'Intended Audience :: Developers',
                  'Intended Audience :: Education',
@@ -37,11 +37,4 @@ conf = dict(
                  ]
 )
 
-try:
-    # setup.py register wants unicode data..
-    conf['long_description'] = readme.decode('utf-8')
-    setup(**conf)
-except Exception:
-    # ..but setup.py sdist upload wants byte data
-    conf['long_description'] = readme
-    setup(**conf)
+setup(**conf)

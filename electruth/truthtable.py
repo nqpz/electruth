@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 # electruth: a collection of boolean logic tools
 # Copyright (C) 2010, 2011  Niels Serup
@@ -30,9 +29,8 @@ def decimal_to_binary(dec, min_size=None):
     if dec == 0:
         string = '0'
     else:
-        string = ''.join([str((dec >> bin) & 1) for
-                          bin in range(int(math.floor(
-                            math.log(dec, 2))), -1, -1)])
+        string = ''.join(str((dec >> bin) & 1) for
+                         bin in range(n.bit_length() - 1, -1, -1))
     if min_size is not None:
         string = '0' * (min_size - len(string)) + string
     return string

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 # electruth: a collection of boolean logic tools
 # Copyright (C) 2010, 2011  Niels Serup
@@ -57,7 +56,7 @@ class NewOptionParser(OptionParser):
 def list_available_types():
     various.print_text_table(*_available_types,
          header=('What', 'Type name', 'Filename ending'))
-    print '''
+    print('''
 Note: When you load a netlist or a schematic, make sure to create
 one or more "end nets". The netnames of these nets should be prefixed
 with ">" (e.g. ">A" (this will be renamed internally to "A", but it
@@ -65,7 +64,7 @@ will retain its status as an "end net")).
 Boolean expressions will be found for these nets only.
 
 If a given input does not match any filename endings and has no
-explicit type, it is considered a basic boolean expression.'''
+explicit type, it is considered a basic boolean expression.''')
     sys.exit()
 
 parser = NewOptionParser(
@@ -120,10 +119,10 @@ options['error_function'] = parser.error
 
 pathorexprs = options['type_given_pathorexprs']
 del options['type_given_pathorexprs']
-[pathorexprs.append(
-        (x.find('.') != -1 and
-         x.split('.')[-1] or
-         None, x)) for x in args]
+pathorexprs.extend(
+    (x.find('.') != -1 and
+     x.split('.')[-1] or
+     None, x) for x in args)
 options['inputs'] = tuple(pathorexprs)
 
 setproctitle(parser.prog)

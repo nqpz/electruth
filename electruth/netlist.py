@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 # electruth: a collection of boolean logic tools
 # Copyright (C) 2010, 2011  Niels Serup
@@ -102,8 +101,8 @@ class Gate(object):
         try:
             func, input_nums = _gates_information[device]
         except KeyError:
-            raise Exception('logic gate %s is not recognized (is it \
-even a logic gate?)' % device)
+            raise Exception('logic gate {} is not recognized (is it \
+even a logic gate?)'.format(device))
         self.name = name
         self.func = func
         self.input_numbers = input_nums
@@ -175,8 +174,8 @@ class NetCollection(object):
                 net_names = net_names_lst[0]
             else:
                 net_names = ', '.join(net_names_lst[:-1]) + ' and ' + net_names_lst[-1]
-            raise Exception('gate %s on nets %s cannot be used more than once' %
-                            (output_gate.name, net_names))
+            raise Exception('gate {} on nets {} cannot be used more than once'.format(
+                    output_gate.name, net_names))
         used_gates.append(output_gate)
         if output_gate is None:
             return boolexpr.BooleanVariable(net.name)
@@ -248,10 +247,9 @@ if __name__ == '__main__':
     # Show a test
     import sys
     if len(sys.argv) == 1:
-        print 'No path was given.'
+        print('No path was given.')
     else:
         collection = parse_geda_netlist(sys.argv[1])
         end_nets = collection.get_end_nets()
         for x in end_nets:
-            print x.name, '=', x.get_logic_path().express()
-            
+            print(x.name, '=', x.get_logic_path().express())

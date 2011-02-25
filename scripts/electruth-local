@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 # electruth: a collection of boolean logic tools
 # Copyright (C) 2010, 2011  Niels Serup
@@ -34,4 +33,4 @@ basedir = os.path.split(progdir)[0]
 sys.path.insert(0, basedir)
 
 INSTALLED = False
-execfile(os.path.join(progdir, 'electruth'))
+exec(open(os.path.join(progdir, 'electruth')).read())

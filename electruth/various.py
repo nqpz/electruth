@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
-# electruth: a stickman-oriented game against time
+# electruth: a collection of boolean logic tools
 # Copyright (C) 2010, 2011  Niels Serup
 
 # This file is part of electruth.
@@ -83,13 +82,15 @@ def print_text_table(*rows, **kwds):
     for x in rows:
         _print_table_row(x, width)
         if header:
-            print '=' * line_width
+            print('=' * line_width)
             header = None
         else:
-            print '-' * line_width
+            print('-' * line_width)
 
 def exec_program(*args):
-    return subprocess.call(map(str, args), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return subprocess.call(tuple(map(str, args)),
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
 
 def _print_table_row(data, width=20):
     if not isinstance(width, list) or isinstance(width, tuple):
@@ -104,14 +105,14 @@ def _print_table_row(data, width=20):
     i = 0
     for x in data:
         if len(x) <= width[i]:
-            print with_whitespace(x, i),
+            print(with_whitespace(x, i), end='')
             extra_data.append(None)
         else:
             wrap = textwrap.wrap(x, width[i])
-            print with_whitespace(wrap[0], i),
+            print(with_whitespace(wrap[0], i), end='')
             extra_data.append(wrap[1:])
         i += 1
-    print
+    print()
 
     ok = False
     for x in extra_data:
@@ -124,12 +125,12 @@ def _print_table_row(data, width=20):
         i = 0
         for x in extra_data:
             if x:
-                print with_whitespace(x[0], i),
+                print(with_whitespace(x[0], i), end='')
                 x.pop(0)
                 if x:
                     ok = True
             else:
-                print with_whitespace('', i),
+                print(with_whitespace('', i), end='')
             i += 1
         if not ok:
-            print
+            print()

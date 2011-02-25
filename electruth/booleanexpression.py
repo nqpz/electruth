@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 # electruth: a collection of boolean logic tools
 # Copyright (C) 2010, 2011  Niels Serup
@@ -29,7 +28,7 @@ _operator_names = ('not', 'and', 'or', 'xor', 'nand', 'nor', 'xnor')
 
 _inverted_operator_names = {
     'and': 'nand',
-    'or': 'nor',
+    'or':  'nor',
     'xor': 'xnor'
 }
 
@@ -125,7 +124,7 @@ class BooleanExpressionError(Exception):
 
 
 def _recursive_show_loop(op):
-    text = '%s(' % op.get_name()
+    text = '{}('.format(op.get_name())
     t_objs = []
     for x in op.objs:
         if x.is_operator:
@@ -163,7 +162,7 @@ def _recursive_express_loop(op, and_symbol, or_symbol, not_symbol):
     if op.func == NOT:
         rec = _recursive_express_loop(
             op.objs[0], and_symbol, or_symbol, not_symbol)
-        return (not_symbol or '!%s') % rec
+        return (not_symbol or '!{}').format(rec)
     text = '('
     t_objs = []
     for x in op.objs:
@@ -172,7 +171,7 @@ def _recursive_express_loop(op, and_symbol, or_symbol, not_symbol):
             not_symbol))
     opname = op.func == AND and and_symbol or op.func == OR and \
         or_symbol or op.get_name().upper()
-    text += (' %s ' % opname).join(t_objs)
+    text += (' {} '.format(opname)).join(t_objs)
     text += ')'
     return text
 
@@ -185,7 +184,7 @@ def _recursive_test_loop(op, **keyvals):
             objs.append(keyvals[x.get_name()])
     return op.func(*objs)
 
-class BooleanBaseObject(object):
+class BooleanBaseObject:
     is_operator=False
     is_variable=False
 
@@ -215,12 +214,12 @@ class BooleanOperator(BooleanBaseObject):
         self.objs = objs
 
     def set_kind(self, kind):
-        if isinstance(kind, basestring):
+        if isinstance(kind, str):
             try:
                 self.func = _translated_operator_types[kind]
             except KeyError:
                 raise BooleanExpressionError(
-                    'operator %s does not exist' % kind)
+                    'operator {} does not exist'.format(kind))
         else:
             self.func = kind
 
@@ -258,15 +257,15 @@ class BooleanOperator(BooleanBaseObject):
             if typ == 'math':
                 _and = '∧'
                 _or = '∨'
-                _not = '¬%s'
+                _not = '¬{}'
             elif typ == 'bool':
                 _and = '·'
                 _or = '+'
-                _not = '%s´'
+                _not = '{}´'
             elif typ == 'latex-bool':
                 _and = '\cdot'
                 _or = '+'
-                _not = '\overline{%s}'
+                _not = '\overline{{{}}}'
             else:
                 _and = None
                 _or = None

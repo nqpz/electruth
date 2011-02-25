@@ -14,11 +14,11 @@ _filedir = os.path.dirname(os.path.realpath(__file__))
 netlist = nl.parse_geda_netlist_from_schematic(os.path.join(
         _filedir, 'simple_schematic.sch'))
 
-print 'Netlist loaded: %s' % netlist
+print('Netlist loaded: {}'.format(netlist))
 ends = netlist.get_end_nets()
-print 'Ends found: %s' % [end.name for end in ends]
+print('Ends found: {}'.format(end.name for end in ends))
 for end in ends:
-    print 'Found %s: %s' % (end.name, netlist.get_logic_path(end))
+    print('Found {}: {}'.format(end.name, netlist.get_logic_path(end)))
 
 # Load the same schematic, but this time convert all paths to boolean
 # expressions immediately and also transform the expressions into
@@ -28,4 +28,4 @@ netlist_exprs = nl.parse_geda_netlist_from_schematic(os.path.join(
         _filedir, 'simple_schematic.sch'), True)
 
 for name, expr in sorted(netlist_exprs.items()):
-    print 'Refound %s: %s' % (name, expr)
+    print('Refound {}: {}'.format(name, expr))

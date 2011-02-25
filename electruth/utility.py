@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 # electruth: a collection of boolean logic tools
 # Copyright (C) 2010, 2011  Niels Serup
@@ -68,7 +67,7 @@ class Utility(SettingsParser):
             self.error_function(msg, done, color=self.term_color_errors)
 
     def status(self, msg):
-        print ginfo.program_name + ': ' + msg
+        print(ginfo.program_name + ': ' + msg)
 
     def add_expression(self, o_name, expr):
         if self.do_compare:
@@ -77,7 +76,7 @@ class Utility(SettingsParser):
             i = 0
             while name in names:
                 i += 1
-                name = o_name + '_%d' % i
+                name = o_name + '_{}'.format(i)
         else:
             name = o_name
         self.exprs.append((name, o_name, expr))
@@ -119,7 +118,7 @@ class Utility(SettingsParser):
 
     def print_exprs(self):
         if not self.exprs:
-            print 'No expressions given'
+            print('No expressions given')
             return
 
         prevs = []
@@ -128,7 +127,7 @@ class Utility(SettingsParser):
                 i = 1
                 for x in prevs[:-1]:
                     for y in prevs[i:]:
-                        print ' \'-', x[0], 'matches', y[0] + '?', x[2].match(y[2])
+                        print(' \'-', x[0], 'matches', y[0] + '?', x[2].match(y[2]))
                     i += 1
                 print
 
@@ -140,7 +139,7 @@ class Utility(SettingsParser):
                 maybe_compare()
                 prevs = [x]
 
-            print x[0] + ' =', x[2].express(self.express_type)
+            print(x[0] + ' =', x[2].express(self.express_type))
             prev = x
         maybe_compare()
 
