@@ -45,7 +45,7 @@ class SettingsParser(object):
             self.__dict__[prop] = val
 
     def __init__(self, ok_config_translations={}, **etc):
-        for key, val in basic_config_translations.iteritems():
+        for key, val in basic_config_translations.items():
             ok_config_translations[key] = val
         ok_config_values = set(ok_config_translations.keys())
 

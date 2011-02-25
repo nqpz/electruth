@@ -20,11 +20,12 @@ License
 
 electruth is free software under the terms of the GNU General Public
 License version 3 (or any later version). The author of electruth is
-Niels Serup, contactable at ns@metanohi.org. This is version 0.1.1 of
-the program, the last version to support Python 2.x (subsequent
-versions will only support Python 3).
+Niels Serup, contactable at ns@metanohi.org. This is version 0.2.0 of
+the program, the first version to support Python 3.1+ (if you need
+support for Python 2.6+, you should download v0.1.1).
 
 The libraries used by electruth are GPL-compatible.
+
 
 Installation
 ============
@@ -33,7 +34,7 @@ Way #1
 ------
 Just run this (requires that you have python-setuptools installed)::
 
-  $ sudo easy_install electruth
+  $ sudo easy_install3 electruth
 
 Way #2
 ------
@@ -43,12 +44,12 @@ http://pypi.python.org/pypi/electruth
 
 Extract the downloaded file and run this in a terminal::
 
-  # python setup.py install
+  # python3 setup.py install
 
 Dependencies
 ============
 
-Python 2.5+ is probably a requirement.
+Python 3.1+ is a requirement.
 
 ``qvikconfig``
  + Web address: http://pypi.python.org/pypi/qvikconfig/
@@ -108,20 +109,20 @@ by newlines.
 
 To see the help for electruth, run::
 
-  pydoc electruth
+  pydoc3 electruth
 
 And especially::
 
-  pydoc electruth.booleanexpression
-  pydoc electruth.netlist
-  pydoc electruth.truthtable
+  pydoc3 electruth.booleanexpression
+  pydoc3 electruth.netlist
+  pydoc3 electruth.truthtable
 
 
 Development
 ===========
 
-electruth is written in Python and uses Git for branches. To get the
-latest branch, get it from gitorious.org like this::
+electruth is written in Python and uses Git for code management. To
+get the latest branch, download it from gitorious.org like this::
 
   $ git clone git://gitorious.org/electruth/electruth.git
 

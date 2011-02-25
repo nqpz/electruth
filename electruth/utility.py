@@ -82,12 +82,15 @@ class Utility(SettingsParser):
         self.exprs.append((name, o_name, expr))
 
     def add_expressions(self, **exprs):
-        for key, val in exprs.iteritems():
+        for key, val in exprs.items():
             self.add_expression(key, val)
 
     def start(self):
         self.load_inputs()
-        self.exprs.sort()
+        try:
+            self.exprs.sort()
+        except TypeError:
+            self.error('when not comparing, names must differ', True)
         self.print_exprs()
 
     def load_inputs(self):
@@ -145,4 +148,3 @@ class Utility(SettingsParser):
 
     def end(self):
         pass
-
