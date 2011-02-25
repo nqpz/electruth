@@ -10,7 +10,7 @@ expressions using the Quine-McClusky method. This can be useful if you
 have a truth table in need of basic shortening. electruth can also be
 used to compare boolean expressions, which can be very useful if you
 need to compare a truth table with a schematic you created based on
-that truth table. electruth can also be used to "destroy" complex
+that truth table. electruth can also be used to transform complex
 boolean expressions into simpler ones consisting only of ANDS, ORS and
 NOTS.
 
@@ -21,13 +21,13 @@ License
 electruth is free software under the terms of the GNU General Public
 License version 3 (or any later version). The author of electruth is
 Niels Serup, contactable at ns@metanohi.org. This is version 0.1.1 of
-the program, the last version to support Python 2.x (next versions
-will only support Python 3).
+the program, the last version to support Python 2.x (subsequent
+versions will only support Python 3).
 
 The libraries used by electruth are GPL-compatible.
 
-Installing
-==========
+Installation
+============
 
 Way #1
 ------
@@ -79,8 +79,8 @@ really have to install it.
  + Author: Daniele Varrazzo <daniele varrazzo at gmail com>
 
 
-Using
-=====
+Use
+===
 
 Installing electruth installs a command-line utility named
 ``electruth``. This program has many settings, and it's recommended to
@@ -106,8 +106,19 @@ Some settings can also be set in a config file. Config files use a
 by newlines.
 
 
-Developing
-==========
+To see the help for electruth, run::
+
+  pydoc electruth
+
+And especially::
+
+  pydoc electruth.booleanexpression
+  pydoc electruth.netlist
+  pydoc electruth.truthtable
+
+
+Development
+===========
 
 electruth is written in Python and uses Git for branches. To get the
 latest branch, get it from gitorious.org like this::
