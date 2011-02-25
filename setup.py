@@ -7,7 +7,6 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 import electruth.generalinformation as ginfo
 
-readme = open('README.txt').read()
 setup(
     name=ginfo.program_name,
     version=ginfo.version_text,
@@ -19,6 +18,7 @@ setup(
     url='http://metanohi.org/projects/electruth/',
     license='GPLv3+',
     description=ginfo.program_description,
+    long_description=open('README.txt').read(),
     classifiers=['Development Status :: 4 - Beta',
                  'Intended Audience :: End Users/Desktop',
                  'Intended Audience :: Developers',
