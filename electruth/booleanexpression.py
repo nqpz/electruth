@@ -114,6 +114,7 @@ _raw_aliases = {
     'nand': 'not and',
     'nor': 'not or',
     'xnor': 'not xor',
+    '⊕': 'xor',
     '∨': ' or ',
     '∧': ' and ',
     '¬': ' not '
@@ -155,22 +156,23 @@ def _match_two(a, b):
     else:
         return False
 
-def _recursive_express_loop(op, and_symbol, or_symbol, not_symbol):
+def _recursive_express_loop(op, and_symbol, or_symbol, not_symbol, xor_symbol):
     if not op.is_operator:
         return op.name
     
     if op.func == NOT:
         rec = _recursive_express_loop(
-            op.objs[0], and_symbol, or_symbol, not_symbol)
+            op.objs[0], and_symbol, or_symbol, not_symbol, xor_symbol)
         return (not_symbol or '!{}').format(rec)
     text = '('
     t_objs = []
     for x in op.objs:
         t_objs.append(_recursive_express_loop(
             x, and_symbol, or_symbol,
-            not_symbol))
+            not_symbol, xor_symbol))
     opname = op.func == AND and and_symbol or op.func == OR and \
-        or_symbol or op.get_name().upper()
+        or_symbol or op.func == XOR and xor_symbol or \
+        op.get_name().upper()
     text += (' {} '.format(opname)).join(t_objs)
     text += ')'
     return text
@@ -258,27 +260,31 @@ class BooleanOperator(BooleanBaseObject):
                 _and = '∧'
                 _or = '∨'
                 _not = '¬{}'
+                _xor = '⊕'
             elif typ == 'bool':
                 _and = '·'
                 _or = '+'
                 _not = '{}´'
+                _xor = '⊕'
             elif typ == 'latex-bool':
                 _and = '\cdot'
                 _or = '+'
                 _not = '\overline{{{}}}'
+                _xor = '\oplus'
             else:
                 _and = None
                 _or = None
                 _not = None
+                _xor = None
             return _recursive_express_loop(
-                self, _and, _or, _not)
+                self, _and, _or, _not, _xor)
 
     def __str__(self):
         return _recursive_show_loop(self)
 
 def parse_raw_expression(expr, always_return_op=False, simplify=False):
     """Convert a raw expression into an internal format."""
-    for orig, new in _raw_aliases.iteritems():
+    for orig, new in _raw_aliases.items():
         expr = expr.replace(orig, new)
     expr = expr.split()
     complete = _parse_raw_part(expr)

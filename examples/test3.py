@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 This example shows how to load and use schematics and netlists (works
 only with gEDA).

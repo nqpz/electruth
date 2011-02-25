@@ -18,11 +18,11 @@ print(expr1, 'or', expr2, '=', expr3, '\n')
 # Express the expressions
 expr_types = ('basic', 'internal', 'math', 'bool', 'latex-bool')
 
-print 'Expressing %s:' % expr3
+print('Expressing {}:'.format(expr3))
 for typ in expr_types:
-    print('%10s: ' % typ, expr3.express(typ))
+    print('{:>10}:  {}'.format(typ, expr3.express(typ)))
 
 tt_expr = tt.create_from_expression(expr3).shorten()
-print '\nExpressing %s:' % tt_expr
+print('\nExpressing {}:'.format(tt_expr))
 for typ in expr_types:
-    print('%10s: ' % typ, tt_expr.express(typ))
+    print('{:>10}:  {}'.format(typ, tt_expr.express(typ)))

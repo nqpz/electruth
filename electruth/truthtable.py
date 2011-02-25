@@ -30,7 +30,7 @@ def decimal_to_binary(dec, min_size=None):
         string = '0'
     else:
         string = ''.join(str((dec >> bin) & 1) for
-                         bin in range(n.bit_length() - 1, -1, -1))
+                         bin in range(dec.bit_length() - 1, -1, -1))
     if min_size is not None:
         string = '0' * (min_size - len(string)) + string
     return string

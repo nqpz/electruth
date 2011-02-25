@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from distutils.core import setup
+import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -7,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 import electruth.generalinformation as ginfo
 
 readme = open('README.txt').read()
-conf = dict(
+setup(
     name=ginfo.program_name,
     version=ginfo.version_text,
     author='Niels Serup',
@@ -36,5 +37,3 @@ conf = dict(
                  'Topic :: Software Development :: Libraries :: Python Modules'
                  ]
 )
-
-setup(**conf)
