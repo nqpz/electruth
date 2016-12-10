@@ -59,7 +59,7 @@ def print_text_table(*rows, **kwds):
     except IndexError:
         raise IndexError('no rows given')
 
-    colwidth_gen = line_width / colnum - 3
+    colwidth_gen = line_width // colnum - 3
     line_width = (colwidth_gen + 3) * 3 - 3
 
     width = []
