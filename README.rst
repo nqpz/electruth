@@ -30,19 +30,7 @@ The libraries used by electruth are GPL-compatible.
 Installation
 ============
 
-Way #1
-------
-Just run this (requires that you have python-setuptools installed)::
-
-  $ sudo easy_install3 electruth
-
-Way #2
-------
-Get the newest version of electruth at
-http://metanohi.org/projects/electruth/ or at
-http://pypi.python.org/pypi/electruth
-
-Extract the downloaded file and run this in a terminal::
+Run this in a terminal::
 
   # python3 setup.py install
 
@@ -116,15 +104,6 @@ And especially::
   pydoc3 electruth.booleanexpression
   pydoc3 electruth.netlist
   pydoc3 electruth.truthtable
-
-
-Development
-===========
-
-electruth is written in Python and uses Git for code management. To
-get the latest branch, download it from gitorious.org like this::
-
-  $ git clone git://gitorious.org/electruth/electruth.git
 
 
 Logo

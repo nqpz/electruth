@@ -18,7 +18,7 @@ setup(
     url='http://metanohi.org/projects/electruth/',
     license='GPLv3+',
     description=ginfo.program_description,
-    long_description=open('README.txt').read(),
+    long_description=open('README.rst').read(),
     classifiers=['Development Status :: 4 - Beta',
                  'Intended Audience :: End Users/Desktop',
                  'Intended Audience :: Developers',
