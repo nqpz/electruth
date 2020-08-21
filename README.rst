@@ -19,8 +19,7 @@ License
 =======
 
 electruth is free software under the terms of the GNU General Public
-License version 3 (or any later version). The author of electruth is
-Niels Serup, contactable at ns@metanohi.org. This is version 0.2.0 of
+License version 3 (or any later version). This is version 0.2.0 of
 the program, the first version to support Python 3.1+ (if you need
 support for Python 2.6+, you should download v0.1.1).
 
